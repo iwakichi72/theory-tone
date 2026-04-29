@@ -7,6 +7,7 @@ const NAV = [
   { href: "/", label: "ホーム" },
   { href: "/lessons", label: "レッスン" },
   { href: "/progressions", label: "進行プレイヤー" },
+  { href: "/analyze", label: "録音解析" },
 ];
 
 export function AppHeader() {

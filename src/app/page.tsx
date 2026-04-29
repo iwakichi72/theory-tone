@@ -35,6 +35,12 @@ export default function HomePage() {
             >
               コード進行プレイヤー
             </Link>
+            <Link
+              href="/analyze"
+              className="rounded-lg border border-edge bg-bg-elevated px-5 py-2.5 text-sm transition hover:border-accent-cool hover:text-white"
+            >
+              録音解析
+            </Link>
           </div>
         </div>
       </section>
