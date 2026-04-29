@@ -1,6 +1,6 @@
 "use client";
 
-const KEYS = ["C", "G", "D", "A", "E", "F", "Bb"] as const;
+const KEYS = ["C", "G", "D", "F", "Bb", "Eb", "A"] as const;
 
 type Props = {
   value: string;

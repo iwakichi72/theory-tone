@@ -1,17 +1,25 @@
-import { transpose } from "./notes";
+import {
+  noteIndex,
+  noteLetter,
+  shiftNoteLetter,
+  spellPitchForLetter,
+} from "./notes";
 
 const MAJOR_INTERVALS = [2, 2, 1, 2, 2, 2, 1] as const;
 const NATURAL_MINOR_INTERVALS = [2, 1, 2, 2, 1, 2, 2] as const;
 
 function buildScale(root: string, intervals: readonly number[]): string[] {
-  const notes: string[] = [root.trim()];
-  let current = root;
-  for (let i = 0; i < intervals.length - 1; i++) {
-    current = transpose(current, intervals[i]);
-    notes.push(current);
+  const rootIndex = noteIndex(root);
+  const rootLetter = noteLetter(root);
+  const notes: string[] = [];
+  let semitoneOffset = 0;
+
+  for (let i = 0; i < intervals.length; i++) {
+    const letter = shiftNoteLetter(rootLetter, i);
+    notes.push(spellPitchForLetter(rootIndex + semitoneOffset, letter));
+    semitoneOffset += intervals[i];
   }
-  // Normalize root to canonical sharp form
-  notes[0] = transpose(root, 0);
+
   return notes;
 }
 

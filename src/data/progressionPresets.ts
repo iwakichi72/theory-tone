@@ -12,10 +12,10 @@ export const progressionPresets = [
     description: "少し感傷的な雰囲気を作りやすい進行",
   },
   {
-    id: "jazz-251",
+    id: "tonal-251",
     name: "ツーファイブワン",
     romanNumerals: ["ii", "V", "I"],
-    description: "ジャズやポップスで重要な解決感のある進行",
+    description: "ジャズにもJ-POPにも出てくる、解決感のある進行",
   },
   {
     id: "basic-145",

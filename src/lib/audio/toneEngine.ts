@@ -1,12 +1,17 @@
 "use client";
 
 import { ascendingNoteOctaves, withOctave } from "@/lib/music/notes";
+import type { Instrument } from "@/lib/music/theoryTypes";
+import { getGuitarChordNotes } from "@/lib/music/guitar";
+import { voiceLeadProgression } from "@/lib/music/voicing";
 import { usePlaybackStore } from "@/store/playbackStore";
 
 type ToneModule = typeof import("tone");
 
 let tonePromise: Promise<ToneModule> | null = null;
 let synth: import("tone").PolySynth | null = null;
+let bassSynth: import("tone").Synth | null = null;
+let guitarSynths: import("tone").PluckSynth[] | null = null;
 let started = false;
 
 let activeProgressionTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -43,6 +48,30 @@ async function ensureStarted(): Promise<ToneModule> {
       },
     }).toDestination();
     synth.volume.value = -8;
+  }
+  if (!bassSynth) {
+    bassSynth = new Tone.Synth({
+      oscillator: { type: "triangle" },
+      envelope: {
+        attack: 0.02,
+        decay: 0.12,
+        sustain: 0.55,
+        release: 0.5,
+      },
+    }).toDestination();
+    bassSynth.volume.value = -13;
+  }
+  if (!guitarSynths) {
+    guitarSynths = Array.from({ length: 6 }, () => {
+      const stringSynth = new Tone.PluckSynth({
+        attackNoise: 0.7,
+        dampening: 4200,
+        resonance: 0.82,
+        release: 1.2,
+      }).toDestination();
+      stringSynth.volume.value = -4;
+      return stringSynth;
+    });
   }
   return Tone;
 }
@@ -135,14 +164,17 @@ export type ProgressionStep = {
 export async function playProgression(
   chords: ProgressionStep[],
   bpm: number,
-  options?: { loop?: boolean },
+  options?: { loop?: boolean; instrument?: Instrument },
 ): Promise<void> {
   if (!isBrowser() || chords.length === 0) return;
-  await ensureStarted();
+  const Tone = await ensureStarted();
 
   clearProgressionSchedule();
   const token = activeProgressionToken;
   const loop = options?.loop ?? false;
+  const instrument =
+    options?.instrument ?? usePlaybackStore.getState().selectedInstrument;
+  const voicedChords = voiceLeadProgression(chords);
 
   const beatsPerChord = 2;
   const chordDurationMs = (60 / bpm) * 1000 * beatsPerChord;
@@ -150,18 +182,46 @@ export async function playProgression(
   usePlaybackStore.getState().setIsPlaying(true);
 
   const scheduleCycle = (cycleStart: number) => {
-    chords.forEach((chord, index) => {
+    voicedChords.forEach((chord, index) => {
       const pitched = chord.notes.map((n) =>
         n.match(/\d/) ? n : withOctave(n, 4),
       );
+      const guitarNotes =
+        instrument === "guitar" ? getGuitarChordNotes(chord.chordName) : [];
 
       const timeout = setTimeout(
         () => {
           if (token !== activeProgressionToken) return;
-          synth?.triggerAttackRelease(pitched, `${beatsPerChord}n`);
+          if (instrument === "guitar") {
+            const notesToStrum = guitarNotes.length > 0 ? guitarNotes : pitched;
+            const start = Tone.now();
+            notesToStrum.forEach((note, noteIndex) => {
+              guitarSynths?.[noteIndex % guitarSynths.length]?.triggerAttack(
+                note,
+                start + noteIndex * 0.028,
+              );
+            });
+            const store = usePlaybackStore.getState();
+            store.setActiveChord(chord.chordName);
+            store.setActiveNotes(notesToStrum);
+            store.setActiveStepIndex(index);
+            return;
+          }
+
+          if (pitched.length > 0) {
+            synth?.triggerAttackRelease(pitched, `${beatsPerChord}n`);
+          }
+          if (chord.bassNote) {
+            bassSynth?.triggerAttackRelease(
+              chord.bassNote,
+              `${beatsPerChord}n`,
+            );
+          }
           const store = usePlaybackStore.getState();
           store.setActiveChord(chord.chordName);
-          store.setActiveNotes(pitched);
+          store.setActiveNotes(
+            chord.bassNote ? [...pitched, chord.bassNote] : pitched,
+          );
           store.setActiveStepIndex(index);
         },
         cycleStart + index * chordDurationMs,
@@ -195,6 +255,22 @@ export function stopPlayback(): void {
       synth.releaseAll();
     } catch {
       // ignore
+    }
+  }
+  if (bassSynth) {
+    try {
+      bassSynth.triggerRelease();
+    } catch {
+      // ignore
+    }
+  }
+  if (guitarSynths) {
+    for (const stringSynth of guitarSynths) {
+      try {
+        stringSynth.triggerRelease();
+      } catch {
+        // ignore
+      }
     }
   }
   usePlaybackStore.getState().resetPlayback();

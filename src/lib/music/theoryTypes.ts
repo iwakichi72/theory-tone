@@ -53,7 +53,7 @@ export type Lesson = {
   sections: LessonSection[];
 };
 
-export type Instrument = "synth" | "piano" | "pad";
+export type Instrument = "synth" | "piano" | "pad" | "guitar";
 
 export type PlaybackState = {
   isPlaying: boolean;

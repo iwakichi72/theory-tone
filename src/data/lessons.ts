@@ -88,6 +88,46 @@ export const lessons: Lesson[] = [
     ],
   },
   {
+    id: "intervals-to-chords",
+    title: "度数: 3度と5度",
+    category: "intervals",
+    level: "beginner",
+    summary:
+      "スケール上の距離を数える「度数」。三和音を暗記ではなく組み立てで理解します。",
+    sections: [
+      {
+        id: "count-scale-steps",
+        heading: "音を数えて距離をつかむ",
+        body: "度数は、スケール上で音を何番目として見るかの数え方です。Cメジャースケールでは C を1度として、D が2度、E が3度、G が5度です。三和音はこの 1度・3度・5度を重ねた形です。",
+        examples: [
+          {
+            id: "c-to-e-third",
+            type: "note",
+            label: "C -> E: 3度",
+            notes: ["C", "E"],
+            bpm: 90,
+            description: "C から数えて3番目の音が E。",
+          },
+          {
+            id: "c-to-g-fifth",
+            type: "note",
+            label: "C -> G: 5度",
+            notes: ["C", "G"],
+            bpm: 90,
+            description: "C から数えて5番目の音が G。",
+          },
+          {
+            id: "c-triad-from-degrees",
+            type: "chord",
+            label: "1度・3度・5度: C E G",
+            notes: ["C", "E", "G"],
+            description: "1つ飛ばしに重ねると C メジャーの三和音になります。",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "triads",
     title: "三和音 (トライアド)",
     category: "chords",
@@ -98,7 +138,7 @@ export const lessons: Lesson[] = [
       {
         id: "what-is-triad",
         heading: "三和音の作り方",
-        body: "ルート音から3度上、5度上の音を重ねるとコード(三和音)になります。3度の幅で「明るい(メジャー)」「暗い(マイナー)」が決まります。",
+        body: "ルート音から3度上、5度上の音を重ねるとコード(三和音)になります。3度の幅で「明るい(メジャー)」「暗い(マイナー)」が決まります。ここではまず骨格として三和音を鳴らします。実際のポップスでは、この上に maj7 / 7 / m7 などの7thが乗ることもよくあります。",
         examples: [
           {
             id: "c-major-triad",
@@ -119,7 +159,8 @@ export const lessons: Lesson[] = [
             type: "chord",
             label: "B diminished: B D F",
             notes: ["B", "D", "F"],
-            description: "緊張感のあるディミニッシュ。",
+            description:
+              "緊張感のあるディミニッシュ。Cメジャーでは G7 からルートの G を抜いた響きに近く、I へ戻りたがります。",
           },
         ],
       },
@@ -195,7 +236,7 @@ export const lessons: Lesson[] = [
       {
         id: "i-v-vi-iv",
         heading: "I–V–vi–IV",
-        body: "Cメジャーで C–G–Am–F。明るさと切なさを行き来する万能進行です。ローマ数字で覚えておけば、キーを変えても同じ役割で使えます。",
+        body: "Cメジャーで C–G–Am–F。明るさと切なさを行き来する万能進行です。ローマ数字で覚えておけば、キーを変えても同じ役割で使えます。ここでは三和音で骨格を確認し、実曲では Cmaj7、G7、Am7、Fmaj7 のように7thが加わることもある、と覚えておきましょう。",
         examples: [
           {
             id: "ivvi-iv-c",

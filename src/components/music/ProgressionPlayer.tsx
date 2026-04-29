@@ -8,6 +8,8 @@ import { playProgression, stopPlayback } from "@/lib/audio/toneEngine";
 import { KeySelector } from "./KeySelector";
 import { BpmControl } from "./BpmControl";
 import { PlayButton } from "./PlayButton";
+import { GuitarFretboard } from "./GuitarFretboard";
+import { InstrumentToggle } from "./InstrumentToggle";
 import { PianoKeyboard } from "./PianoKeyboard";
 
 export function ProgressionPlayer() {
@@ -19,6 +21,8 @@ export function ProgressionPlayer() {
   const setBpm = usePlaybackStore((s) => s.setBpm);
   const loop = usePlaybackStore((s) => s.loop);
   const setLoop = usePlaybackStore((s) => s.setLoop);
+  const selectedInstrument = usePlaybackStore((s) => s.selectedInstrument);
+  const setSelectedInstrument = usePlaybackStore((s) => s.setSelectedInstrument);
   const isPlaying = usePlaybackStore((s) => s.isPlaying);
   const activeStepIndex = usePlaybackStore((s) => s.activeStepIndex);
 
@@ -46,13 +50,16 @@ export function ProgressionPlayer() {
       stopPlayback();
       return;
     }
-    await playProgression(resolved, bpm, { loop });
+    await playProgression(resolved, bpm, {
+      instrument: selectedInstrument,
+      loop,
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-edge bg-bg-surface p-5">
-        <div className="grid gap-5 md:grid-cols-[2fr,1fr,1fr,auto] md:items-end">
+        <div className="grid gap-5 md:grid-cols-[2fr,1fr,1fr,1fr,auto] md:items-end">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs uppercase tracking-wide text-white/40">
               プリセット
@@ -73,6 +80,10 @@ export function ProgressionPlayer() {
 
           <KeySelector value={selectedKey} onChange={setSelectedKey} />
           <BpmControl value={bpm} onChange={setBpm} />
+          <InstrumentToggle
+            value={selectedInstrument}
+            onChange={setSelectedInstrument}
+          />
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs uppercase tracking-wide text-white/40">
@@ -95,7 +106,8 @@ export function ProgressionPlayer() {
         <div className="mt-5 flex items-center gap-4">
           <PlayButton onClick={handleTogglePlay} isPlaying={isPlaying} />
           <span className="text-xs text-white/50">
-            {selectedKey} メジャーキー · {preset.romanNumerals.join(" – ")}
+            {selectedKey} メジャーキー · {preset.romanNumerals.join(" – ")} ·{" "}
+            {selectedInstrument === "guitar" ? "Guitar" : "Keys"}
           </span>
         </div>
 
@@ -126,7 +138,15 @@ export function ProgressionPlayer() {
         </div>
       </div>
 
-      <PianoKeyboard startOctave={4} octaveCount={2} />
+      {selectedInstrument === "guitar" ? (
+        <GuitarFretboard
+          chords={resolved}
+          activeStepIndex={activeStepIndex}
+          isPlaying={isPlaying}
+        />
+      ) : (
+        <PianoKeyboard startOctave={4} octaveCount={2} />
+      )}
     </div>
   );
 }

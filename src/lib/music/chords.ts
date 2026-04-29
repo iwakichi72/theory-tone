@@ -1,4 +1,9 @@
-import { transpose } from "./notes";
+import {
+  noteIndex,
+  noteLetter,
+  shiftNoteLetter,
+  spellPitchForLetter,
+} from "./notes";
 import type { ChordQuality, DiatonicTriad } from "./theoryTypes";
 import { getMajorScale, getNaturalMinorScale } from "./scales";
 
@@ -11,7 +16,12 @@ const QUALITY_INTERVALS: Record<ChordQuality, [number, number, number]> = {
 
 export function getTriad(root: string, quality: ChordQuality): string[] {
   const intervals = QUALITY_INTERVALS[quality];
-  return intervals.map((semi) => transpose(root, semi));
+  const rootIndex = noteIndex(root);
+  const rootLetter = noteLetter(root);
+
+  return intervals.map((semi, i) =>
+    spellPitchForLetter(rootIndex + semi, shiftNoteLetter(rootLetter, i * 2)),
+  );
 }
 
 const MAJOR_DIATONIC_QUALITIES: ChordQuality[] = [
